@@ -1779,8 +1779,10 @@
         </div>
 
 <!-- Elfsight Google Reviews | Untitled Google Reviews -->
-<script src="https://elfsightcdn.com/platform.js" async></script>
-<div class="elfsight-app-321ec82b-703a-4b47-910e-d1a64849c74b" data-elfsight-app-lazy></div>
+<div id="reviewsHome">
+    <script src="https://elfsightcdn.com/platform.js" async></script>
+    <div class="elfsight-app-321ec82b-703a-4b47-910e-d1a64849c74b" data-elfsight-app-lazy></div>
+</div>
 
         <footer class="footer">
             <div class="footer-container">
@@ -2246,6 +2248,8 @@
             document.getElementById("statusAbertoFechado")
                 ?.classList.remove("hidden");
 
+                controlarReviewsHome();
+
             carregarCarrinho();
         }
 
@@ -2275,6 +2279,9 @@
 
             // ✅ ESCONDE O FOOTER AO ESCOLHER SABORES
             esconderFooter();
+
+            controlarReviewsHome();
+
         }
 
         /* =======================
@@ -2402,6 +2409,8 @@
             if (header) header.classList.add("hidden");
 
             esconderFooter();
+
+            controlarReviewsHome();
 
             atualizarCarrinho();
         }
@@ -2543,6 +2552,8 @@
 
             // ESCONDE ELEMENTOS DO HEADER
             esconderHeaderCheckout();
+
+            controlarReviewsHome();
         }
 
         /* =======================
@@ -3146,6 +3157,28 @@
         }
 
         setInterval(verificarPopup, 300);
+
+        //esconder avaliações
+        function controlarReviewsHome() {
+
+    const reviews = document.getElementById("reviewsHome");
+    if (!reviews) return;
+
+    const produto = document.getElementById("produtoSelecionado");
+    const carrinho = document.getElementById("carrinho");
+    const checkout = document.getElementById("checkout");
+
+    const estaNaHome =
+        produto.classList.contains("hidden") &&
+        carrinho.classList.contains("hidden") &&
+        checkout.classList.contains("hidden");
+
+    if (estaNaHome) {
+        reviews.style.display = "block";
+    } else {
+        reviews.style.display = "none";
+    }
+}
 
 
 
