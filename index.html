@@ -3279,9 +3279,11 @@ function gerarPixCopiaECola(valor) {
     const nome = "BOMDOCE";
     const cidade = "PALMEIRADASMISSOES";
 
-    function formatar(valor) {
-        return valor.toString().padStart(2, "0");
-    }
+function formatar(valor) {
+    // retorna o tamanho exato do campo, com 2 dígitos ou mais se precisar
+    const tamanho = valor.length;
+    return tamanho < 10 ? "0" + tamanho : tamanho.toString();
+}
 
     function montarCampo(id, valor) {
         return id + formatar(valor.length) + valor;
