@@ -1188,8 +1188,76 @@
         .lfCQiA {
     margin-bottom: 18px!important;
     margin-top: 35px!important;
+} 
+
+/* Container principal da chave PIX */
+#pixChave {
+    display: flex;               /* alinha ícone, texto e botão na horizontal */
+    align-items: center;         /* verticalmente centralizado */
+    gap: 10px;                   /* espaçamento entre os elementos */
+    padding: 10px 15px;          /* espaço interno */
+    margin: 10px auto;           /* centraliza horizontalmente na tela */
+    font-family: Arial, sans-serif;
+    font-size: 0.8em;
+    cursor: default;
 }
 
+/* Ícone do Pix */
+#pixChave .pix-icon {
+    width: 1.8em;
+    height: 1.8em;
+}
+
+/* Texto da chave */
+#pixChave #chavePix {
+    flex: 1;                     /* ocupa espaço restante */
+    overflow-x: auto;            /* se a chave for grande, permite rolagem horizontal */
+    white-space: nowrap;          /* não quebra linha */
+    text-overflow: ellipsis;     /* mostra "..." se não couber */
+}
+
+/* Container do botão copiar */
+#pixChave .copy-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Ícone de copiar */
+#pixChave .copy-icon {
+    font-size: 18px;
+    color: #555;
+    transition: color 0.2s;
+}
+
+
+/* Texto do copiar */
+#pixChave .copy-text {
+    font-size: 10px;
+    color: #555;
+    transition: color 0.2s;
+}
+
+
+/* Responsivo para telas pequenas */
+@media (max-width: 400px) {
+    #pixChave {
+        font-size: 1em;
+        padding: 8px 12px;
+        max-width: 90%;
+    }
+
+    #pixChave .pix-icon {
+        width: 20px;
+        height: 20px;
+    }
+
+    #pixChave .copy-text {
+        font-size: 10px;
+    }
+}
 
 
 
@@ -2043,7 +2111,7 @@
 
         <h3><i class="fa-regular fa-money-bill-1" style="font-size: 18px;"></i> Forma de Pagamento:
         </h3>
-        <label><input type="checkbox" name="pagamento" value="Pix" onclick="habilitarFinalizar()"> Pix</label>
+        <label><input type="checkbox" name="pagamento" value="Pix" onclick="habilitarFinalizar()"> Pix (copia e cola)</label>
 
         <div id="pixChave" class="pix-container">
             <img src="https://cdn.awsli.com.br/2396/2396648/arquivos/pix_icon.svg" alt="Ícone Pix" class="pix-icon"
@@ -2482,9 +2550,6 @@
             `;
             });
 
-            if (entregaSelecionada === "entrega") {
-                totalPedido += taxaEntrega;
-            }
 
             total.innerText = totalPedido.toFixed(2);
         }
@@ -2541,25 +2606,37 @@
         /* =======================
         ENTREGA / CHECKOUT
         ======================= */
-        function selecionarEntrega(tipo) {
-            entregaSelecionada = tipo;
-            document.getElementById("enderecoEntrega").classList.toggle("hidden", tipo !== "entrega");
-            atualizarCarrinho();
-        }
+function selecionarEntrega(tipo) {
+    entregaSelecionada = tipo;
+    document.getElementById("enderecoEntrega").classList.toggle("hidden", tipo !== "entrega");
 
-        function mostrarCheckout() {
-            if (carrinho.length === 0) {
-                alert("Carrinho vazio");
-                return;
-            }
-            document.getElementById("checkout").classList.remove("hidden");
-            document.getElementById("carrinho").classList.add("hidden");
+    // Atualiza PIX dinamicamente
+    const valorFinal = calcularTotalFinal();
+    const pixCode = gerarPixCopiaECola(valorFinal);
+    document.getElementById("chavePix").innerText = pixCode;
 
-            // ESCONDE ELEMENTOS DO HEADER
-            esconderHeaderCheckout();
+    atualizarCarrinho(); // mantem carrinho correto (só produtos)
+}
 
-            controlarReviewsHome();
-        }
+function mostrarCheckout() {
+    if (carrinho.length === 0) {
+        alert("Carrinho vazio");
+        return;
+    }
+
+    document.getElementById("checkout").classList.remove("hidden");
+    document.getElementById("carrinho").classList.add("hidden");
+
+    esconderHeaderCheckout();
+    controlarReviewsHome();
+
+    // ✅ usa cálculo correto
+    const valorFinal = calcularTotalFinal();
+const pixCode = gerarPixCopiaECola(valorFinal);
+document.getElementById("chavePix").innerText = pixCode;
+}
+
+
 
         /* =======================
         HABILITAR FINALIZAR (PIX)
@@ -3185,6 +3262,66 @@
     }
 }
 
+/*chave pix copia e cola*/
+
+function calcularTotalFinal() {
+    let totalProdutos = carrinho.reduce((t, item) => t + item.precoTotal, 0);
+
+    if (entregaSelecionada === "entrega") {
+        return totalProdutos + taxaEntrega;
+    }
+
+    return totalProdutos;
+}
+
+function gerarPixCopiaECola(valor) {
+    const chave = "bomdocepm@gmail.com";
+    const nome = "BOMDOCE";
+    const cidade = "PALMEIRADASMISSOES";
+
+    function formatar(valor) {
+        return valor.toString().padStart(2, "0");
+    }
+
+    function montarCampo(id, valor) {
+        return id + formatar(valor.length) + valor;
+    }
+
+    let payload =
+        "000201" +
+        montarCampo("26",
+            montarCampo("00", "BR.GOV.BCB.PIX") +
+            montarCampo("01", chave)
+        ) +
+        "52040000" +
+        "5303986" +
+        montarCampo("54", valor.toFixed(2)) +
+        "5802BR" +
+        montarCampo("59", nome) +
+        montarCampo("60", cidade) +
+        "62070503***";
+
+    function crc16(str) {
+        let crc = 0xFFFF;
+        for (let i = 0; i < str.length; i++) {
+            crc ^= str.charCodeAt(i) << 8;
+            for (let j = 0; j < 8; j++) {
+                if ((crc & 0x8000) !== 0) {
+                    crc = (crc << 1) ^ 0x1021;
+                } else {
+                    crc <<= 1;
+                }
+                crc &= 0xFFFF;
+            }
+        }
+        return crc.toString(16).toUpperCase().padStart(4, "0");
+    }
+
+    const payloadFinal = payload + "6304";
+    const crc = crc16(payloadFinal);
+
+    return payloadFinal + crc;
+}
 
 
 
