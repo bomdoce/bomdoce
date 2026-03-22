@@ -3277,7 +3277,7 @@ function calcularTotalFinal() {
 function gerarPixCopiaECola(valor) {
     const chave = "bomdocepm@gmail.com";
     const nome = "BOMDOCE";
-    const cidade = "PALMEIRADASMISSOES";
+    const cidade = "PALMEIRA DAS MISSOES";
 
     function formatar(valor) {
         return valor.toString().padStart(2, "0");
@@ -3287,6 +3287,9 @@ function gerarPixCopiaECola(valor) {
         return id + formatar(valor.length) + valor;
     }
 
+    // 🔥 GARANTE FORMATO CORRETO (SEM VÍRGULA)
+    const valorFormatado = Number(valor).toFixed(2);
+
     let payload =
         "000201" +
         montarCampo("26",
@@ -3295,10 +3298,10 @@ function gerarPixCopiaECola(valor) {
         ) +
         "52040000" +
         "5303986" +
-        montarCampo("54", valor.toFixed(2)) +
+        montarCampo("54", valorFormatado) +
         "5802BR" +
-        montarCampo("59", nome) +
-        montarCampo("60", cidade) +
+        montarCampo("59", nome.substring(0, 25)) + // limite PIX
+        montarCampo("60", cidade.substring(0, 15)) + // limite PIX
         "62070503***";
 
     function crc16(str) {
